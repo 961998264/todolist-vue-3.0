@@ -8,14 +8,11 @@
 import { useProvider } from './context/index'
 export default {
   name: 'App',
-  components: {
-  },
   setup () {
     useProvider()
     return {
     }
   }
-
 }
 </script>
 

@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import { useAsync } from '../../hooks/useAsync'
 import ListItem from './listItem'
 import Header from './Header'
 import UnFinish from './unFinish'
@@ -31,6 +32,11 @@ import { useListInject } from '../../context/home/index'
 import { reactive, computed, watch, onMounted, ref, watchEffect } from 'vue'
 export default {
   name: 'Home',
+  data () {
+    return {
+      testname: 22
+    }
+  },
   components: {
     Header,
     UnFinish,
@@ -40,35 +46,65 @@ export default {
   props: {
     name: String,
   },
+  computed: {
+    a: {
+      get: function () {
+        return this.testname
+      },
+      set: function (val) {
+        return this.testname = this.testname - val
+      }
+    }
+  },
+  created () {
+    this.a = 5
+
+  },
   // eslint-disable-next-line no-unused-vars
   setup (props, val) {
-    const { list, changeStatus, getList, loading, unFinish, finished, addList, activeItem, setActiveItem, setContext } = useListInject()
+    // eslint-disable-next-line no-unused-vars
+    const { list, changeStatus, getList, unFinish, finished, addList, activeItem, setContext } = useListInject()
     const textarea = ref('')
-    if (activeItem)
-      getList()
+    const { loading } = useAsync(getList)
+
     const submit = () => {
       setContext(activeItem.value.id, textarea.value)
       textarea.value = ''
       activeItem.value = null
+      count.value = count.value + 1
+
+    }
+    const count = ref(0)
+    let p = (value) => {
+      setTimeout(() => {
+        console.log("p -> value", value)
+      }, 2000)
+      return Promise.resolve(value)
     }
 
-    // watchEffect(() => {
-    //   console.log(textarea, "textarea")
-    // })
+    const data = ref(null)
+    watchEffect(
+      // eslint-disable-next-line no-unused-vars
+      async (onInvalidate) => {
+        console.log(loading.value, "loading")
+        // console.log(count.value, '副作用')
+        const token = await p(count.value)
+        console.log("setup -> data.value", data.value)
+        onInvalidate(() => {
+          // id 改变时 或 停止侦听时
+          // 取消之前的异步操作
+          console.log('取消了啊ß')
+          token.cancel()
+        })
+      }
+    )
+
     watch(activeItem, (val, ) => {
       if (val) {
         textarea.value = val.context
       }
-
     })
-    // // 未完成事件列表
-    // const unFinish = computed(() => {
-    //   list.value.filter(item => item.status === 0)
-    // })
-    // // 已完成事件列表
-    // const Finished = computed(() => {
-    //   list.value.filter(item => item.status === 0)
-    // })
+
     return {
       list,
       changeStatus,
@@ -79,7 +115,6 @@ export default {
       activeItem,
       textarea,
       submit,
-      setActiveItem
     }
   }
 }

@@ -1,5 +1,5 @@
 
-import { provide, ref, Ref, inject, computed } from 'vue'
+import { provide, ref, Ref, inject, computed, } from 'vue'
 import { getListApi } from 'api/home'
 type list = listItem[]
 interface listItem {
@@ -9,42 +9,44 @@ interface listItem {
   status: number,
 
 }
-type loading = boolean
-
 interface ListContext {
   list: Ref<list>,
   getList: () => {},
   changeStatus: (id: number, status: number) => void,
-  loading: loading,
+
   addList: (item: listItem) => void,
   delList: (id: number) => void,
   finished: Ref<list>,
   unFinish: Ref<list>,
   setContext: (id: number, context: string) => void,
-  activeItem: Ref<list>,
   setActiveItem: () => void,
 }
-
+// provide名称，推荐用Symbol
 const listymbol = Symbol()
-
+// 提供provide的函数
 export const useListProvide = () => {
   // 全部事件 
-  let loading = ref<loading>(false)
   const list = ref<list>([]);
-  const activeItem = ref<listItem | null>(null)
-  const setActiveItem = (item: listItem | null) => {
-    activeItem.value = item
-  }
+  // 当前查看的事件id
+  const activeId = ref<number | null>(null)
+  // 当前查看的事件
+  const activeItem = computed(() => {
+    if (activeId.value || activeId.value === 0) {
+      const item = list.value.filter((item: listItem) => item.id === activeId.value)
+      return item[0]
+    } else {
+      return null
+    }
+  })
   // 获取list
   const getList = async function () {
-    console.log('getListgetList')
-    loading.value = true
-    const res = await getListApi()
-    list.value = res
-    setTimeout(() => {
-      loading.value = false
-    }, 500)
+    const res: any = await getListApi()
+    console.log("useListProvide -> res", res)
+    if (res.code === 0) {
+      list.value = res.data
+    }
   }
+  // 新增list
   const addList = (item: listItem) => {
     list.value.push(item)
   }
@@ -56,15 +58,14 @@ export const useListProvide = () => {
       list.value[removeIndex].status = status
     }
   };
+  // 修改事件信息
   const setContext = (id: number, context: string) => {
-
-    console.log("setContext -> context", context)
-
     const Index = list.value.findIndex((listItem: listItem) => listItem.id === id)
     if (Index !== -1) {
       list.value[Index].context = context
     }
   }
+  // 删除事件
   const delList = (id: number) => {
     console.log("delList -> id", id)
     for (let i = 0; i < list.value.length; i++) {
@@ -82,22 +83,21 @@ export const useListProvide = () => {
   const finished = computed(() => {
     return list.value.filter(item => item.status === 1)
   })
+
   provide(listymbol, {
     list,
     unFinish,
     finished,
-    loading,
     changeStatus,
     getList,
     addList,
     delList,
+    setContext,
     activeItem,
-    setActiveItem,
-    setContext
+    activeId
   })
-
 }
-
+// 
 export const useListInject = () => {
   const listContext = inject<ListContext>(listymbol);
   if (!listContext) {

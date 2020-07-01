@@ -1,6 +1,6 @@
 <template>
-  <div class='list-item' @click="setActiveItem(data)" v-if="data"
-    :class="{'active':activeItem&&activeItem.id === data.id && !isDetail}">
+  <div class='list-item' @click="setActiveId(data.id)" v-if="data"
+    :class="{'active':activeId === data.id && !isDetail}">
     <div v-if="data&&data.status===0">
       <input type="checkbox" @click='changeStatus(data.id,1)'>
       <span>
@@ -13,6 +13,7 @@
       <span v-if="isDetail">{{data.title}}</span>
       <s v-else>{{data.title}}</s>
     </div>
+    {{activeitem}}
   </div>
 </template>
 
@@ -37,11 +38,14 @@ export default {
     }
   },
   setup () {
-    const { changeStatus, activeItem, setActiveItem } = useListInject()
+    const { changeStatus, activeId, } = useListInject()
+    const setActiveId = (id) => {
+      activeId.value = id
+    }
     return {
       changeStatus,
-      activeItem,
-      setActiveItem
+      setActiveId,
+      activeId
     }
   },
   methods: {
