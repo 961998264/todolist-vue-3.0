@@ -16,11 +16,21 @@
       <textarea name="content" v-model="textarea" maxlength="200" class="detail"
         placeholder="待办事件详情"></textarea>
       <div class="btn" v-if="activeItem" @click="submit">确定</div>
+
+      <div>
+        <h1>list</h1>
+        <div v-for="item in list" :key="item.id">
+          {{item}}
+        </div>
+      </div>
+      <br />
+      activeItem：{{activeItem}}
     </div>
   </div>
 </template>
 
 <script>
+import { listymbol } from '../../context/home/index'
 import { useAsync } from '../../hooks/useAsync'
 import ListItem from './listItem'
 import Header from './Header'
@@ -29,7 +39,7 @@ import Finished from './finished'
 // eslint-disable-next-line no-unused-vars
 import { useListInject } from '../../context/home/index'
 // eslint-disable-next-line no-unused-vars
-import { reactive, computed, watch, onMounted, ref, watchEffect } from 'vue'
+import { reactive, inject, computed, watch, onMounted, ref, watchEffect } from 'vue'
 export default {
   name: 'Home',
   data () {
@@ -46,6 +56,7 @@ export default {
   props: {
     name: String,
   },
+
   computed: {
     a: {
       get: function () {
@@ -62,50 +73,29 @@ export default {
   },
   // eslint-disable-next-line no-unused-vars
   setup (props, val) {
+    const listContext = inject(listymbol)
+    console.log("setup -> listContext", listContext)
+
     // eslint-disable-next-line no-unused-vars
-    const { list, changeStatus, getList, unFinish, finished, addList, activeItem, setContext } = useListInject()
+    const { list, changeStatus, getList, unFinish, finished, addList, activeId, activeItem, setContext } = useListInject()
     const textarea = ref('')
     const { loading } = useAsync(getList)
-
+    const count = ref(0)
     const submit = () => {
       setContext(activeItem.value.id, textarea.value)
       textarea.value = ''
-      activeItem.value = null
+      activeId.value = null
       count.value = count.value + 1
-
-    }
-    const count = ref(0)
-    let p = (value) => {
-      setTimeout(() => {
-        console.log("p -> value", value)
-      }, 2000)
-      return Promise.resolve(value)
     }
 
-    const data = ref(null)
-    watchEffect(
-      // eslint-disable-next-line no-unused-vars
-      async (onInvalidate) => {
-        console.log(loading.value, "loading")
-        // console.log(count.value, '副作用')
-        const token = await p(count.value)
-        console.log("setup -> data.value", data.value)
-        onInvalidate(() => {
-          // id 改变时 或 停止侦听时
-          // 取消之前的异步操作
-          console.log('取消了啊ß')
-          token.cancel()
-        })
-      }
-    )
-
-    watch(activeItem, (val, ) => {
+    watch(activeItem, (val,) => {
       if (val) {
         textarea.value = val.context
       }
     })
 
     return {
+
       list,
       changeStatus,
       loading,
@@ -124,7 +114,8 @@ export default {
   box-sizing: border-box;
 }
 .main {
-  overflow: hidden;
+  overflow-x: hidden;
+
   width: 100%;
   height: 100vh;
   display: flex;

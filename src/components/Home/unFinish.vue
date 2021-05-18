@@ -33,13 +33,15 @@ export default {
     }
   }, // 一定要写这个props选项，否则 setup 的props为undefined
   setup () {
+    const count = ref(0)
     const toggle = ref(true)
     const onToggle = () => {
       toggle.value = !toggle.value
     }
     return {
+      count,
       toggle,
-      onToggle
+      onToggle,
     }
   },
   methods: {

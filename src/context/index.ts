@@ -1,7 +1,7 @@
-import { useListProvide, useListInject } from './home/index'
-console.log("useListInject", useListInject)
+export { useListProvide, useListInject } from './home/index'
+// console.log("useListInject", useListInject)
 
-export { useListInject }
-export const useProvider = () => {
-  useListProvide()
-}
+// export { useListInject }
+// export const useProvider = () => {
+//   useListProvide()
+// }

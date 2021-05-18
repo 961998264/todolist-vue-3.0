@@ -1,0 +1,3 @@
+[submodule "src/mobile-ui"]
+	path = src/mobile-ui
+	url = https://github.com/961998264/mobile-ui

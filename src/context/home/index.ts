@@ -13,7 +13,6 @@ interface ListContext {
   list: Ref<list>,
   getList: () => {},
   changeStatus: (id: number, status: number) => void,
-
   addList: (item: listItem) => void,
   delList: (id: number) => void,
   finished: Ref<list>,
@@ -22,7 +21,7 @@ interface ListContext {
   setActiveItem: () => void,
 }
 // provide名称，推荐用Symbol
-const listymbol = Symbol()
+export const listymbol = Symbol()
 // 提供provide的函数
 export const useListProvide = () => {
   // 全部事件 
@@ -30,14 +29,15 @@ export const useListProvide = () => {
   // 当前查看的事件id
   const activeId = ref<number | null>(null)
   // 当前查看的事件
-  const activeItem = computed(() => {
-    if (activeId.value || activeId.value === 0) {
-      const item = list.value.filter((item: listItem) => item.id === activeId.value)
-      return item[0]
-    } else {
-      return null
-    }
-  })
+  const activeItem = computed(
+    () => {
+      if (activeId.value || activeId.value === 0) {
+        const item = list.value.filter((item: listItem) => item.id === activeId.value)
+        return item[0]
+      } else {
+        return null
+      }
+    })
   // 获取list
   const getList = async function () {
     const res: any = await getListApi()
